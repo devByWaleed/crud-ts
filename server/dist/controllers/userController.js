@@ -1,5 +1,6 @@
-import UserModel from '../models/Users.js';
-// import UserModel from '../../dist/models/Users.js';
+// import UserModel from '../models/Users.js';
+// Import your prisma instance from where you created the singleton
+import prisma from "../lib/prisma.js";
 // Create Controller Function
 export const createUser = async (req, res) => {
     const { name, email, age } = req.body;
@@ -10,15 +11,23 @@ export const createUser = async (req, res) => {
         });
     }
     try {
-        const existingUser = await UserModel.findOne({ email });
+        // const existingUser = await UserModel.findOne({ email })
+        const existingUser = await prisma.user.findUnique({
+            where: { email }
+        });
         if (existingUser) {
             return res.json({
                 success: false,
                 message: "User already existed"
             });
         }
-        const user = new UserModel({ name, email, age });
-        await user.save();
+        // const user = new UserModel({ name, email, age })
+        // await user.save();
+        const user = await prisma.user.create({
+            data: {
+                name, email, age
+            }
+        });
         return res.json({
             success: true,
             message: "User Created Successfully"
@@ -36,7 +45,8 @@ export const createUser = async (req, res) => {
 // Read Controller Function
 export const getUser = async (req, res) => {
     try {
-        const users = await UserModel.find({});
+        // const users = await UserModel.find({})
+        const users = await prisma.user.findMany();
         if (!users) {
             return res.json({
                 success: false,
@@ -62,7 +72,10 @@ export const getUser = async (req, res) => {
 export const getUserByID = async (req, res) => {
     const id = req.params.id;
     try {
-        const userByID = await UserModel.findById({ _id: id });
+        // const userByID = await UserModel.findById({ _id: id })
+        const userByID = await prisma.user.findUnique({
+            where: { id: id }
+        });
         // if (!users) {
         //     return res.json({
         //         success: false,
@@ -89,7 +102,11 @@ export const updateUser = async (req, res) => {
     try {
         const id = req.params.id;
         const { name, email, age } = req.body;
-        const updatedUser = await UserModel.findByIdAndUpdate({ _id: id }, { name, email, age }, { new: true, runValidators: true });
+        // const updatedUser = await UserModel.findByIdAndUpdate({ _id: id }, { name, email, age }, { new: true, runValidators: true });
+        const updatedUser = await prisma.user.update({
+            where: { id: id },
+            data: { name, email, age },
+        });
         return res.json({
             success: true,
             message: "User Updated Successfully",
@@ -110,7 +127,10 @@ export const deleteUser = async (req, res) => {
     try {
         const id = req.params.id;
         // Empty for all users
-        await UserModel.findByIdAndDelete({ _id: id });
+        // await UserModel.findByIdAndDelete({ _id: id })
+        await prisma.user.delete({
+            where: { id: id }
+        });
         return res.json({
             success: true,
             message: "User Deleted Successfully",

@@ -1,6 +1,7 @@
 import type { Request, Response } from "express"; // Use 'import type' for interfaces
-import UserModel from '../models/Users.js';
-// import UserModel from '../../dist/models/Users.js';
+// import UserModel from '../models/Users.js';
+// Import your prisma instance from where you created the singleton
+import prisma from "../lib/prisma.js";
 
 
 // Create Controller Function
@@ -15,7 +16,10 @@ export const createUser = async (req: Request, res: Response) => {
     }
 
     try {
-        const existingUser = await UserModel.findOne({ email })
+        // const existingUser = await UserModel.findOne({ email })
+        const existingUser = await prisma.user.findUnique({
+            where: { email }
+        })
 
         if (existingUser) {
             return res.json({
@@ -24,8 +28,13 @@ export const createUser = async (req: Request, res: Response) => {
             })
         }
 
-        const user = new UserModel({ name, email, age })
-        await user.save();
+        // const user = new UserModel({ name, email, age })
+        // await user.save();
+        const user = await prisma.user.create({
+            data: {
+                name, email, age
+            }
+        })
 
         return res.json({
             success: true,
@@ -48,7 +57,8 @@ export const createUser = async (req: Request, res: Response) => {
 export const getUser = async (req: Request, res: Response) => {
 
     try {
-        const users = await UserModel.find({})
+        // const users = await UserModel.find({})
+        const users = await prisma.user.findMany()
 
         if (!users) {
             return res.json({
@@ -78,7 +88,10 @@ export const getUser = async (req: Request, res: Response) => {
 export const getUserByID = async (req: Request, res: Response) => {
     const id = req.params.id
     try {
-        const userByID = await UserModel.findById({ _id: id })
+        // const userByID = await UserModel.findById({ _id: id })
+        const userByID = await prisma.user.findUnique({
+            where: { id: id as string }
+        })
 
         // if (!users) {
         //     return res.json({
@@ -111,7 +124,11 @@ export const updateUser = async (req: Request, res: Response) => {
         const id = req.params.id;
         const { name, email, age } = req.body;
 
-        const updatedUser = await UserModel.findByIdAndUpdate({ _id: id }, { name, email, age }, { new: true, runValidators: true });
+        // const updatedUser = await UserModel.findByIdAndUpdate({ _id: id }, { name, email, age }, { new: true, runValidators: true });
+        const updatedUser = await prisma.user.update({
+            where: { id: id as string },
+            data: { name, email, age },
+        });
 
         return res.json({
             success: true,
@@ -137,7 +154,10 @@ export const deleteUser = async (req: Request, res: Response) => {
         const id = req.params.id
 
         // Empty for all users
-        await UserModel.findByIdAndDelete({ _id: id })
+        // await UserModel.findByIdAndDelete({ _id: id })
+        await prisma.user.delete({
+            where: { id: id as string }
+        })
 
         return res.json({
             success: true,

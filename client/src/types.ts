@@ -1,6 +1,7 @@
 // Interface matching MongoDB Model
 export interface User {
-    _id: string;
+    // _id: string;
+    id: string;         // For Prisma
     name: string;
     email: string;
     age: number;

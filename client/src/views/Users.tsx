@@ -33,7 +33,7 @@ const Users: React.FC = () => {
         try {
             const { data } = await axios.delete<ApiResponse>("http://localhost:4000/api/user/delete-user/" + id);
             // Instead of reloading the page, filter the local state for speed
-            setUsers(users.filter(user => user._id !== id));
+            setUsers(users.filter(user => user.id !== id));
             toast.success(data.message)
         } catch (error: any) {
             toast.error(error.message)
@@ -62,22 +62,22 @@ const Users: React.FC = () => {
                         </thead>
 
                         <tbody className='divide-y divide-gray-100'>
-                            {users.map((user) => (
-                                <tr key={user._id} className="hover:bg-gray-50 transition duration-150">
+                            {users.map((user, index) => (
+                                <tr key={index} className="hover:bg-gray-50 transition duration-150">
                                     <td className='py-4 px-4 text-gray-700 font-medium'>{user.name}</td>
                                     <td className='py-4 px-4 text-gray-600'>{user.email}</td>
                                     <td className='py-4 px-4 text-gray-600'>{user.age}</td>
                                     <td className='py-4 px-4'>
                                         <div className="flex justify-center gap-3">
                                             <Link
-                                                to={`/update/${user._id}`}
+                                                to={`/update/${user.id}`}
                                                 className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition"
                                             >
                                                 Edit
                                             </Link>
                                             <button
                                                 className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition"
-                                                onClick={() => handleDelete(user._id)}
+                                                onClick={() => handleDelete(user.id)}
                                             >
                                                 Delete
                                             </button>
